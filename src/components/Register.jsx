@@ -1,24 +1,14 @@
 import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-function Register({ onRegister, isSuccess }) {
-    const navigate = useNavigate();
-
+function Register({ onRegister}) {
     const email = useRef();
     const password = useRef();
-
-    const goToLogin = () => {
-        navigate('/sign-in', { replace: true });
-    }
 
     const handleSubmit = (evt) => {
         evt.preventDefault();
 
         onRegister(email.current.value, password.current.value);
-
-        if (isSuccess) {
-            goToLogin();
-        }
     }
 
     return (
@@ -33,7 +23,7 @@ function Register({ onRegister, isSuccess }) {
                 </label>
                 <button type="submit" className="sign__submit">Зарегистрироваться</button>
             </form>
-            <p className="sign__redirect" onClick={goToLogin}>Уже зарегистрированы? Войти</p>
+            <Link to="/sign-in" className="sign__redirect">Уже зарегистрированы? Войти</Link>
         </div>
     );
 }

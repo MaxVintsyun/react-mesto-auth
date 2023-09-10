@@ -1,17 +1,14 @@
 import React from "react";
-import SuccessImg from "../images/SuccessImg.svg"
-import UnsuccessImg from "../images/UnsuccessImg.svg"
 
-function InfoTooltip(props) {
+function InfoTooltip({isOpen, icon, text, onClose}) {
     return (
-        <div className={`popup ${props.isOpen ? 'popup_opened' : ''}`}>
+        <div className={`popup ${isOpen ? 'popup_opened' : ''}`}>
             <div className="popup__overlay popup__content">
-                <img className="popup-info-tooltip__image" src={props.isSuccess ? SuccessImg : UnsuccessImg} alt='' />
+                <img className="popup-info-tooltip__image" src={icon} alt='' />
                 <p className="popup-info-tooltip__text">
-                    {props.isSuccess ?
-                        'Вы успешно зарегистрировались!' : 'Что-то пошло не так! Попробуйте ещё раз.'}
+                    {text}
                 </p>
-                <button className="popup__close-button" type="button" onClick={props.onClose}></button>
+                <button className="popup__close-button" type="button" onClick={onClose}></button>
             </div>
         </div>
     );

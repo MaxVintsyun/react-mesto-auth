@@ -15,6 +15,8 @@ import InfoTooltip from './InfoTooltip';
 import { api } from '../utils/Api';
 import { auth } from '../utils/Auth';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
+import SuccessImg from "../images/SuccessImg.svg"
+import UnsuccessImg from "../images/UnsuccessImg.svg"
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -25,27 +27,29 @@ function App() {
   const [cards, setCards] = useState([]);
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState('');
-  const [isTooltipActive, setTooltipActive] = useState(false);
+  const [isSuccessInfoTooltipStatus, setSuccessInfoTooltipStatus] = useState(false);
   const [isRegistrationSuccess, setRegistrationSuccess] = useState(false);
 
   const navigate = useNavigate();
 
 
   useEffect(() => {
-    Promise.all([api.getUserInfo(), api.getDefaultCards()])
-      .then(([userData, defaultCards]) => {
-        setCurrentUser(userData);
-        setCards(defaultCards);
-      })
-      .catch((error) => { console.error('Ошибка: ', error) });
-  }, []);
+    if (isLoggedIn) {
+      Promise.all([api.getUserInfo(), api.getDefaultCards()])
+        .then(([userData, defaultCards]) => {
+          setCurrentUser(userData);
+          setCards(defaultCards);
+        })
+        .catch((error) => { console.error('Ошибка: ', error) });
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
-    tokenCheck();
+    checkToken();
   }, []);
 
 
-  function tokenCheck() {
+  function checkToken() {
     const jwt = localStorage.getItem('jwt');
     if (jwt) {
       auth.checkToken(jwt)
@@ -135,18 +139,21 @@ function App() {
   function handleRegister(email, password) {
     auth.registerUser(email, password)
       .then((userData) => {
-        if (userData) {
-          setRegistrationSuccess(true)
-          navigate('/sign-in', { replace: true })
-        } else {
-          setRegistrationSuccess(false);
-        }
+        setRegistrationSuccess(true)
+        navigate('/sign-in', { replace: true })
       })
-    setTooltipActive(true);
+      .catch((error) => {
+        setRegistrationSuccess(false);
+        console.error('Ошибка: ', error);
+      })
+      .finally(() => {
+        setSuccessInfoTooltipStatus(true);
+      })
   }
 
   function handleSignOut() {
     localStorage.removeItem('jwt');
+    setLoggedIn(false);
     navigate('/sign-in', { replace: true })
   }
 
@@ -155,15 +162,18 @@ function App() {
     setIsAddPlacePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
     setSelectedCard(null);
-    setTooltipActive(false);
+    setSuccessInfoTooltipStatus(false);
   }
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
-        <Header email={userEmail} onSignOut={handleSignOut} />
+        <Header
+          email={userEmail}
+          onSignOut={handleSignOut}
+        />
         <Routes>
-          <Route path='/'
+          <Route path='/*'
             element={
               <ProtectedRoute
                 element={Main}
@@ -178,24 +188,59 @@ function App() {
               />
             }
           />
-          <Route path='/sign-in' element={<Login onLogin={handleLogin} />} />
-          <Route path='/sign-up' element={<Register onRegister={handleRegister} isSuccess={isRegistrationSuccess} />} />
+          <Route
+            path='/sign-in'
+            element={<Login onLogin={handleLogin} />}
+          />
+          <Route
+            path='/sign-up'
+            element={<Register onRegister={handleRegister}
+              isSuccess={isRegistrationSuccess} />}
+          />
         </Routes>
         <Footer />
 
-        <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar} />
+        <EditAvatarPopup
+          isOpen={isEditAvatarPopupOpen}
+          onClose={closeAllPopups}
+          onUpdateAvatar={handleUpdateAvatar} />
 
-        <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} />
+        <EditProfilePopup
+          isOpen={isEditProfilePopupOpen}
+          onClose={closeAllPopups}
+          onUpdateUser={handleUpdateUser}
+        />
 
-        <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlaceSubmit} />
+        <AddPlacePopup
+          isOpen={isAddPlacePopupOpen}
+          onClose={closeAllPopups}
+          onAddPlace={handleAddPlaceSubmit}
+        />
 
-        <ImagePopup link={selectedCard?.link} name={selectedCard?.name} onClose={closeAllPopups} />
+        <ImagePopup
+          link={selectedCard?.link}
+          name={selectedCard?.name}
+          onClose={closeAllPopups} />
 
         <PopupWithForm name="delete-card" title="Вы уверены?" onClose={closeAllPopups}>
           <button className="popup__save-button popup__delete-button" type="submit">Да</button>
         </PopupWithForm>
 
-        <InfoTooltip isOpen={isTooltipActive} isSuccess={isRegistrationSuccess} onClose={closeAllPopups} />
+        {isRegistrationSuccess ?
+          <InfoTooltip
+            isOpen={isSuccessInfoTooltipStatus}
+            icon={SuccessImg}
+            text='Вы успешно зарегистрировались!'
+            onClose={closeAllPopups}
+          />
+          :
+          <InfoTooltip
+            isOpen={isSuccessInfoTooltipStatus}
+            icon={UnsuccessImg}
+            text='Что-то пошло не так! Попробуйте ещё раз.'
+            onClose={closeAllPopups}
+          />
+        }
       </div>
     </CurrentUserContext.Provider>
   );

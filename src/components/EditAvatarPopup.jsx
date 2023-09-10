@@ -22,12 +22,12 @@ function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar }) {
             title="Обновить аватар"
             isOpen={isOpen}
             onClose={onClose}
-            onSubmit={handleSubmit}>
+            onSubmit={handleSubmit}
+            submitButtonText='Сохранить'>
             <label className="popup__field">
                 <input className="popup__input" id="avatar-link-input" type="url" ref={avatar} name="avatar" placeholder="Ссылка на картинку" required />
                 <span className="avatar-link-input-error popup__input-error"></span>
             </label>
-            <button className="popup__save-button" type="submit">Сохранить</button>
         </PopupWithForm>
     );
 }

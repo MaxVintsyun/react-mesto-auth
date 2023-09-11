@@ -27,7 +27,7 @@ function App() {
   const [cards, setCards] = useState([]);
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState('');
-  const [isSuccessInfoTooltipStatus, setSuccessInfoTooltipStatus] = useState(false);
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
   const [isRegistrationSuccess, setRegistrationSuccess] = useState(false);
 
   const navigate = useNavigate();
@@ -147,7 +147,7 @@ function App() {
         console.error('Ошибка: ', error);
       })
       .finally(() => {
-        setSuccessInfoTooltipStatus(true);
+        setIsInfoTooltipOpen(true);
       })
   }
 
@@ -162,7 +162,7 @@ function App() {
     setIsAddPlacePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
     setSelectedCard(null);
-    setSuccessInfoTooltipStatus(false);
+    setIsInfoTooltipOpen(false);
   }
 
   return (
@@ -226,21 +226,12 @@ function App() {
           <button className="popup__save-button popup__delete-button" type="submit">Да</button>
         </PopupWithForm>
 
-        {isRegistrationSuccess ?
-          <InfoTooltip
-            isOpen={isSuccessInfoTooltipStatus}
-            icon={SuccessImg}
-            text='Вы успешно зарегистрировались!'
-            onClose={closeAllPopups}
-          />
-          :
-          <InfoTooltip
-            isOpen={isSuccessInfoTooltipStatus}
-            icon={UnsuccessImg}
-            text='Что-то пошло не так! Попробуйте ещё раз.'
-            onClose={closeAllPopups}
-          />
-        }
+        <InfoTooltip
+          isOpen={isInfoTooltipOpen}
+          icon={isRegistrationSuccess ? SuccessImg : UnsuccessImg}
+          text={isRegistrationSuccess ? 'Вы успешно зарегистрировались!' : 'Что-то пошло не так! Попробуйте ещё раз.'}
+          onClose={closeAllPopups}
+        />
       </div>
     </CurrentUserContext.Provider>
   );
